@@ -1,0 +1,467 @@
+---
+title: "Übersicht DataScience Projekte"
+author: "Oliver Speer"
+date: "2023-10-30"
+format: 
+  revealjs:
+    self_contained: true
+    slide-number: true
+    logo: logo_pos.png
+    css: style.css
+---
+
+```{r}
+# check whether packages are installed, if not install packages and load libraries
+if (!require("tidyverse")) install.packages("tidyverse")
+library(tidyverse)
+if (!require("readxl")) install.packages("readxl")
+library(readxl)
+if (!require("lubridate")) install.packages("lubridate")
+library(lubridate)
+if (!require("knitr")) install.packages("knitr")
+library(knitr)
+if (!require("kableExtra")) install.packages("kableExtra")
+library(kableExtra)
+if (!require("ggplot2")) install.packages("ggplot2")
+library(ggplot2)
+library(gridExtra)
+```
+
+```{r}
+# import data from "H:\R\LabJournal\Tryptase_Jan22_Aug23.xlsx"
+tryptase <- read_excel("Tryptase_Jan22_Aug23.xlsx")
+
+
+# change tryptase$Fallnummer and tryptase$Tryptase_12622 to numeric
+tryptase$Fallnummer <- as.numeric(tryptase$Fallnummer)
+tryptase$Tryptase_12622 <- as.numeric(tryptase$Tryptase_12622)
+
+# extract date from tryptase.creatinin$Tagesnummer
+tryptase$Datum <- ymd(substr(tryptase$Tagesnummer, 1, 10))
+
+# delete all rows with missing values in tryptase$Tryptase_12622 and tryptase$Fallnummer
+tryptase <- tryptase |> 
+  filter(!is.na(Tryptase_12622), !is.na(Fallnummer))
+```
+
+```{r}
+# import data from "H:\R\LabJournal\eGFR.xlsx" and silence warnings
+suppressWarnings(eGFR <- read_excel("eGFR.xlsx"))
+
+
+
+# change eGFR$Fallnummer and eGFR$eGFR to numeric
+eGFR$Fallnummer <- as.numeric(eGFR$Fallnummer)
+eGFR$`GFR(CKD-EPI)` <- as.numeric(eGFR$`GFR(CKD-EPI)`)
+
+# extract date from eGFR$Tagesnummer
+eGFR$Datum <- ymd(substr(eGFR$Tagesnummer, 1, 10))
+
+ 
+# left_join tryptase with eGFR to get eGFR data by compareing tryptase$Fallnummer with eGFR$Fallnummer, and tryptase$Geb.datum with eGFR$Geb.datum, keeping only eGFR$`GFR(CKD-EPI)` and join keys.
+tryptase.eGFR <- tryptase |> 
+  left_join(eGFR, by = c("Fallnummer", "Geb.datum", "Datum"))
+
+
+
+# remove all rows with missing values
+tryptase.eGFR <- tryptase.eGFR |> 
+  filter(!is.na(`GFR(CKD-EPI)`))
+# drop duplicate rows from tryptase.eGFR
+tryptase.eGFR <- tryptase.eGFR |> 
+  distinct()
+# rename tryptase.eGFR$`GFR(CKD-EPI)` to eGFR_CKD_EPI, and rename tryptase.eGFR$Werte to Creatinin, 
+tryptase.eGFR <- tryptase.eGFR |> 
+  rename(eGFR_CKD_EPI = `GFR(CKD-EPI)`, Tryptase = Tryptase_12622)
+
+# group tryptase.eGFR into KDIGO stages
+tryptase.eGFR <- tryptase.eGFR |> 
+  mutate(KDIGO = case_when(
+    eGFR_CKD_EPI >= 90 ~ "1",
+    eGFR_CKD_EPI >= 60 & eGFR_CKD_EPI < 90 ~ "2",
+    eGFR_CKD_EPI >= 45 & eGFR_CKD_EPI < 60 ~ "3a",
+    eGFR_CKD_EPI >= 30 & eGFR_CKD_EPI < 45 ~ "3b",
+    eGFR_CKD_EPI >= 15 & eGFR_CKD_EPI < 30 ~ "4",
+    eGFR_CKD_EPI < 15 ~ "5",
+    TRUE ~ "NA"
+  ))
+```
+
+```{r}
+# read in BUN.xlsx data surpressing warnings
+BUN <- read_excel("BUN.xlsx") |> 
+  suppressWarnings()
+
+BUN$BUN <- as.numeric(BUN$BUN)
+
+# remove all rows including BUN with missing values, and drop duplicate rows
+BUN <- BUN |> 
+  filter(!is.na(BUN)) |> 
+  distinct()
+
+# extract date from BUN$Tagesnummer
+BUN$Datum <- ymd(substr(BUN$Tagesnummer, 1, 10))
+
+```
+
+```{r}
+# join tryptase.eGFR with BUN by $Fallnummer, $Geb.datum & $Datum.
+tryptase.eGFR.BUN <- tryptase.eGFR |> 
+  left_join(BUN, by = c("Fallnummer", "Geb.datum", "Datum"))
+
+
+```
+
+```{r}
+# transform tryptase.eGFR$Tryptase logarithmically
+tryptase.eGFR <- tryptase.eGFR |> 
+  mutate(Tryptase.log = log(Tryptase))
+```
+
+```{r}
+# sort tryptase.eGFR by KDIGO 1 and KDIGO 3a each into new dataframe tryptase.log.1 and tryptase.log.3a
+tryptase.log.1 <- tryptase.eGFR |> 
+  filter(KDIGO == "1")
+tryptase.log.3a <- tryptase.eGFR |> 
+  filter(KDIGO == "3a")
+tryptase.log.2 <- tryptase.eGFR |> 
+  filter(KDIGO == "2")
+tryptase.log.3b <- tryptase.eGFR |> 
+  filter(KDIGO == "3b")
+tryptase.log.4 <- tryptase.eGFR |>
+  filter(KDIGO == "4")
+
+# sort all tryptase.eGFR$Tryptase.log values except KDIGO = 1 into new dataframe tryptase.log.pat
+tryptase.log.pat <- tryptase.eGFR |> 
+  filter(KDIGO != "1")
+tryptase.log.pat3_5 <- tryptase.eGFR |>
+  filter(KDIGO != "1" & KDIGO != "2")
+```
+
+```{r}
+# import data from "C:\R_local\LabJournal\Mastozytose.xlsx"
+suppressWarnings(mastozytose <- read_excel("Mastozytose.xlsx", col_types = c("text", "text", "date", "date", "numeric", "numeric")))
+
+mastozytose$Datum <- as.Date(mastozytose$Datum)
+
+mastozytose <- mastozytose |> 
+  filter(!is.na(eGFR))
+
+# group mastozytose into KDIGO stages
+mastozytose <- mastozytose |> 
+  mutate(KDIGO = case_when(
+    eGFR >= 90 ~ "1",
+    eGFR >= 60 & eGFR < 90 ~ "2",
+    eGFR >= 45 & eGFR < 60 ~ "3a",
+    eGFR >= 30 & eGFR < 45 ~ "3b",
+    eGFR >= 15 & eGFR < 30 ~ "4",
+    eGFR < 15 ~ "5",
+    TRUE ~ "NA"
+  ))
+
+mastozytose <- mastozytose |> 
+  mutate(KDIGOa = case_when(
+    eGFR >= 90 ~ "1",
+    eGFR < 90 ~ "2-3b",
+    # eGFR >= 45 & eGFR < 60 ~ "3a",
+    # eGFR >= 30 & eGFR < 45 ~ "3b",
+    # eGFR >= 15 & eGFR < 30 ~ "4",
+    # eGFR < 15 ~ "5",
+    TRUE ~ "NA"
+  ))
+```
+
+
+## Daten-Übersicht
+
+-   Tryptase vs eGFR vs BUN vs KDIGO
+
+
+```{r}
+# rename eGFR_CKD_EPI to eGFR in tryptase.eGFR.BUN
+tryptase.eGFR.BUN <- tryptase.eGFR.BUN |> 
+  rename(eGFR = eGFR_CKD_EPI)
+
+# convert KDIGO to factor
+tryptase.eGFR.BUN$KDIGO <- as.factor(tryptase.eGFR.BUN$KDIGO)
+
+# plot tryptase vs eGFR vs BUN vs KDIGO by pairs
+tryptase.eGFR.BUN |> 
+  select(Tryptase, eGFR, BUN, KDIGO) |> 
+  pairs()
+```
+
+
+## Serum Tryptase je KDIGO Gruppe {.smaller .scrollable transition="slide"}
+
+::: panel-tabset
+### Boxplot
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=5}
+# boxplot logarithmic tryptase.eGFR$Tryptase by tryptase.eGFR$KDIGO, print n, print p-value for Kruskal-Wallis test
+bp1 <- ggplot(tryptase.eGFR, aes(x = KDIGO, y = Tryptase)) +
+  geom_boxplot() +
+  labs(x = "KDIGO", y = "Tryptase log(ng/ml)") +
+  scale_y_log10() +
+  theme_bw() +
+  coord_cartesian(ylim = c(0.9, 200)) +
+  theme(text = element_text(size = 14))
+
+# boxplot log tryptase.mastozytose$Tryptase by tryptase.mastozytose$eGFR, showing points, colored by KDIGO
+bp2 <- ggplot(mastozytose, aes(x = KDIGOa, y = Tryptase)) +
+  geom_boxplot() +
+  geom_point(aes(shape = KDIGO), size = 2, position = position_jitter(width = 0.2)) +
+  labs(x = " ", y = "Tryptase log(ng/ml)") +
+  scale_y_log10() +
+  coord_cartesian(ylim = c(0.9, 200)) +
+  theme_bw()+
+  theme(text = element_text(size = 14))+
+  # scale_color_manual(values = c("green", "lightblue", "navy", "orange", "red", "black", "grey")) +
+  scale_shape_manual(values = c(16, 17, 18, 8, 15, 19, 20))
+
+# arrange bp1 and bp2 in 2 columns
+grid.arrange(bp1, bp2, ncol = 2)
+```
+
+
+### Statistics
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, fig.width=8, fig.height=6}
+# print the  n, the meadian values, the 2.5% quantile, the 97.5% quantile for the tryptase.eGFR$Tryptase by KDIGO group; round to 2 digits
+tryptase.KDIGO.stats <- tryptase.eGFR |> 
+  group_by(KDIGO) |> 
+  summarise(n = n(), median = round(median(Tryptase), 2), "2.5 % Quantile" = round(quantile(Tryptase, probs = 0.025), 2), "97.5 % Quantile" = round(quantile(Tryptase, probs = 0.975), 2))
+
+tryptase.KDIGO.wide <- tryptase.KDIGO.stats  |> # Create a new data frame
+  gather(key = "statistic", value = "value", -KDIGO)  |>   # Convert to long format
+  spread(key = KDIGO, value = value)  
+
+# turn order of statistic to n, median, 2.5 % Quantile, 97.5 % Quantile and not alphabetical
+tryptase.KDIGO.wide$statistic <- factor(tryptase.KDIGO.wide$statistic, 
+                                        levels = c("n", "median", "2.5 % Quantile", "97.5 % Quantile")) 
+
+tryptase.KDIGO.wide <- tryptase.KDIGO.wide  |> 
+  arrange(statistic)
+
+# tryptase.KDIGO.wide[1, ] with digits = 2
+tryptase.KDIGO.wide<- as.data.frame(tryptase.KDIGO.wide)
+tryptase.KDIGO.wide[2,2:7] <- as.integer(tryptase.KDIGO.wide[2,2:7])
+
+# print tryptase.KDIGO.wide as kable table
+library(knitr)
+kable(tryptase.KDIGO.wide, digits = 2, align = "c", caption = "Statistics of Serum Tryptase by KDIGO group", size = 5)
+
+# print the  n, the meadian values, the 2.5% quantile, the 97.5% quantile for the tryptase.eGFR$Tryptase by KDIGO group; round to 2 digits
+masto.KDIGO.stats <- mastozytose |> 
+  group_by(KDIGOa) |> 
+  summarise(n = n(), median = round(median(Tryptase), 2), "2.5 % Quantile" = round(quantile(Tryptase, probs = 0.025), 2), "97.5 % Quantile" = round(quantile(Tryptase, probs = 0.975), 2))
+
+masto.KDIGO.wide <- masto.KDIGO.stats  |> # Create a new data frame
+  gather(key = "statistic", value = "value", -KDIGOa)  |>   # Convert to long format
+  spread(key = KDIGOa, value = value)  
+
+# turn order of statistic to n, median, 2.5 % Quantile, 97.5 % Quantile and not alphabetical
+masto.KDIGO.wide$statistic <- factor(masto.KDIGO.wide$statistic, 
+                                        levels = c("n", "median", "2.5 % Quantile", "97.5 % Quantile")) 
+
+masto.KDIGO.wide <- masto.KDIGO.wide  |> 
+  arrange(statistic)
+
+
+# tryptase.KDIGO.wide[1, ] with digits = 2
+masto.KDIGO.wide<- as.data.frame(masto.KDIGO.wide)
+masto.KDIGO.wide[2,2:3] <- as.integer(masto.KDIGO.wide[2,2:3])
+
+
+
+# print tryptase.KDIGO.wide as kable table
+library(knitr)
+kable(masto.KDIGO.wide, digits = 2, align = "c", caption = "Statistics of Serum Tryptase by KDIGO group in Mastocytosis", size = 5)
+
+```
+
+:::
+
+## Referenz Intervalle aus ZLM-Labor-Daten {.smaller .scrollable transition="slide"}
+
+
+```{r}
+library(refineR)
+combined.data.kc <- readRDS("C:\\R_local\\labStat\\Combined_Data_KC.rds")
+filteredData.ka <- combined.data.kc[combined.data.kc$Bezeichnung == "Kalium", ]
+filteredData.na <- combined.data.kc[combined.data.kc$Bezeichnung == "Natrium", ]
+    # Filter the filteredData to retain unique rows based on "b_Fallnummer"
+uniqueData.ka <- filteredData.ka[!duplicated(filteredData.ka$b_Fallnummer),]
+uniqueData.na <- filteredData.na[!duplicated(filteredData.na$b_Fallnummer),]
+    # Extract the values for the reference interval calculation
+values.ka <- uniqueData.ka$Werte
+values.na <- uniqueData.na$Werte
+    # Calculate the reference interval using refineR
+
+RI.ka <- findRI(Data = values.ka)
+RI.na <- findRI(Data = values.na)
+
+par(mfrow = c(1, 2))
+
+plot(RI.ka, showPathol = TRUE, showOutliers = TRUE, showRI = TRUE, showStats = TRUE, showPlot = TRUE, title = "estimated Reference Interval Kalium", xlab = "Kalium (mmol/l)")
+
+# print n of values used for RI calculation
+print(paste("n of values used for RI calculation Kalium:", length(values.ka)))
+     
+plot(RI.na, Nhist = 500, showPathol = TRUE, showOutliers = TRUE, showRI = TRUE, showStats = TRUE, showPlot = TRUE, title = "estimated Reference Interval Natrium", xlab = "Natrium (mmol/l)")
+
+# print n of values used for RI calculation
+print(paste("n of values used for RI calculation Natrium:", length(values.na)))
+```
+
+
+## RI von AU5800 Daten {.smaller .scrollable transition="slide"}
+
+
+```{r}
+AU.data <- combined.data.kc[combined.data.kc$Gerät == "AU5800", ]
+# Define a function to compute and plot reference intervals
+computeAndPlotRI <- function(bezeichnung_value, data) {
+  # Filter the data
+  filteredData <- data[data$Bezeichnung == bezeichnung_value, ]
+  
+  # Filter to retain unique rows based on "b_Fallnummer"
+  uniqueData <- filteredData[!duplicated(filteredData$b_Fallnummer), ]
+  
+  # Extract the values for reference interval calculation
+  values <- uniqueData$Werte
+  
+  # If there are no values or length is less than or equal to 10, just return
+  if(length(values) <= 10) return(NULL)
+  
+  # If the length of values is less than or equal to 10, print the bezeichnung_value
+  # if(length(values) <= 10) {
+  #   cat("The Bezeichnung value with length less than or equal to 10:", bezeichnung_value, "\n")
+  #   return(NULL)
+  # }
+  
+  # Calculate the reference interval using refineR
+  RI <- findRI(Data = values)
+  
+  # Plot the reference interval
+  plot(RI, showPathol = TRUE, showOutliers = TRUE, showRI = TRUE, showStats = TRUE, showPlot = TRUE, xlab = paste0(bezeichnung_value, " "), title = NULL)
+  
+  return(RI)
+}
+
+# Iterate over each unique Bezeichnung value and apply the function
+# for(bezeichnung_value in unique(combined.data.kc$Bezeichnung)) {
+#  computeAndPlotRI(bezeichnung_value, combined.data.kc)
+# }
+
+
+# Get number of unique Bezeichnung values
+num_plots <- length(unique(AU.data$Bezeichnung))
+
+# Let's assume you want 2 columns
+num_columns <- 6
+
+# Calculate number of rows needed
+num_rows <- ceiling(num_plots / num_columns)
+
+# Set up the plotting grid
+par(mar = c(0.5,0.5,0.5,0.5))
+par(oma = c(0,0,0,0))
+par(mfrow = c(num_rows, num_columns))
+
+
+# Iterate over each unique Bezeichnung value and apply the function
+counter <- 0
+max_iterations <- 48
+
+for(bezeichnung_value in unique(AU.data$Bezeichnung)) {
+  if (counter >= max_iterations) {
+    break
+  }
+  
+  computeAndPlotRI(bezeichnung_value, AU.data)
+  counter <- counter + 1
+}
+
+# Reset plot parameters to default after looping
+par(mfrow = c(1, 1))
+
+```
+
+
+
+## RI von DxI800 Daten {.smaller .scrollable transition="slide"}
+
+
+```{r}
+DxI.data <- combined.data.kc[combined.data.kc$Gerät == "DxI", ]
+# Define a function to compute and plot reference intervals
+computeAndPlotRI <- function(bezeichnung_value, data) {
+  # Filter the data
+  filteredData <- data[data$Bezeichnung == bezeichnung_value, ]
+  
+  # Filter to retain unique rows based on "b_Fallnummer"
+  uniqueData <- filteredData[!duplicated(filteredData$b_Fallnummer), ]
+  
+  # Extract the values for reference interval calculation
+  values <- uniqueData$Werte
+  
+  # If there are no values or length is less than or equal to 10, just return
+  if(length(values) <= 10) return(NULL)
+  
+  # If the length of values is less than or equal to 10, print the bezeichnung_value
+  # if(length(values) <= 10) {
+  #   cat("The Bezeichnung value with length less than or equal to 10:", bezeichnung_value, "\n")
+  #   return(NULL)
+  # }
+  
+  # Calculate the reference interval using refineR
+  RI <- findRI(Data = values)
+  
+  # Plot the reference interval
+  plot(RI, showPathol = TRUE, showOutliers = TRUE, showRI = TRUE, showStats = TRUE, showPlot = TRUE, xlab = paste0(bezeichnung_value, " "), title = NULL)
+  
+  return(RI)
+}
+
+# Iterate over each unique Bezeichnung value and apply the function
+# for(bezeichnung_value in unique(combined.data.kc$Bezeichnung)) {
+#  computeAndPlotRI(bezeichnung_value, combined.data.kc)
+# }
+
+
+# Get number of unique Bezeichnung values
+num_plots <- length(unique(DxI.data$Bezeichnung))
+
+# Let's assume you want 2 columns
+num_columns <- 6
+
+# Calculate number of rows needed
+num_rows <- ceiling(num_plots / num_columns)
+
+# Set up the plotting grid
+par(mar = c(0.5,0.5,0.5,0.5))
+par(oma = c(0,0,0,0))
+par(mfrow = c(num_rows, num_columns))
+
+
+# Iterate over each unique Bezeichnung value and apply the function
+counter <- 0
+max_iterations <- 48
+
+for(bezeichnung_value in unique(DxI.data$Bezeichnung)) {
+  if (counter >= max_iterations) {
+    break
+  }
+  
+  computeAndPlotRI(bezeichnung_value, DxI.data)
+  counter <- counter + 1
+}
+
+# Reset plot parameters to default after looping
+par(mfrow = c(1, 1))
+
+```
+

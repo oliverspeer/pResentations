@@ -28,6 +28,29 @@ jupyter: python3
 - Verifiaktionen und Validierungen in der IT
 - Quiz
 
+
+## Was ist Verifikation und Validierung?
+
+- Verifikation: 
+  - Ist das richtige Produkt entwickelt worden?
+  - Wurde das Produkt richtig entwickelt?
+  
+- Validierung:
+  - Ist das richtige Produkt entwickelt worden?
+  - Wurde das Produkt richtig entwickelt?
+  - Ist das Produkt für den vorgesehenen Zweck geeignet?
+  
+  
+## Warum Verifikationen und Validierungen?
+
+- Verifikationen und Validierungen sind gesetzlich vorgeschrieben
+- Verifikationen und Validierungen sind notwendig, 
+    - um die Qualität der Ergebnisse zu gewährleisten
+    - um die Patientensicherheit zu gewährleisten
+    - um die Qualität der Produkte zu gewährleisten
+    - um die Qualität der Prozesse zu gewährleisten
+
+## 
 ## Verifikationen und Validierungen im medizinischen Labor
 ### Begriffsdefinitionen
 

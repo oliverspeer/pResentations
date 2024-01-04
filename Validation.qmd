@@ -1,5 +1,5 @@
 ---
-title: "Verifikation / Validation im med Labor"
+title: "Verifikation / Validation im medizinischen Labor"
 author: "Oliver Speer"
 date: "2024-01-25"
 format: 

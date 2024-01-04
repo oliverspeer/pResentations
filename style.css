@@ -1,0 +1,84 @@
+/* For title */
+.reveal h1 {
+    font-size: 40px;
+    color: red; /* Change to your preferred color */ 
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+/* For author */
+.reveal h2.author {
+    font-size: 20px;
+    color: #28a745; !important /* Change to your preferred color */
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* For date */
+.reveal .date {
+    font-size: 20px;
+    color: #17a2b8; /* Change to your preferred color */
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* For slide number */
+.reveal .slide-number {
+    font-size: 20px;
+    color: #ffc107; /* Change to your preferred color */
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* For slide number delimiter */
+.reveal .slide-number .slide-number-delimiter {
+    color: #ffc107; /* Change to your preferred color */
+}
+
+/* General slide styling */
+.reveal section {
+    font-size: 24px;
+    color: #333333; /* Text color */
+    background-color: #f0f0f0; /* Slide background color */
+    padding: 20px; /* Padding around the slide content */
+}
+
+/* For slide headers */
+.reveal section h2 {
+    font-size: 30px;
+    color: red; /* Change to your preferred color */
+    margin-bottom: 15px;
+}
+
+# /* For bullet points */
+# .reveal section ul {
+#     margin-left: 40px;
+#     color: #444444; /* Change to your preferred color */
+# }
+
+/* For numbered lists */
+.reveal section ol {
+    margin-left: 40px;
+    color: #444444; /* Change to your preferred color */
+}
+
+/* Custom style for bullet points */
+.reveal section ul li::before {
+    content: '•'; /* Unicode character for bullet */
+    color: red; /* Color for bullet points */
+    font-size: 20px; /* Size of the bullet points */
+    margin-right: 10px;
+}
+
+/* Resetting default list styles */
+.reveal section ul {
+    list-style: none; /* Removes default bullets */
+    padding-left: 0; /* Adjust as needed */
+}
+
+/* Style for text in list items */
+.reveal section ul li {
+    color: black; /* Color for text */
+    margin-left: 40px; /* Spacing for the list */
+}
+

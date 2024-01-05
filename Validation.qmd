@@ -14,75 +14,73 @@ editor: visual
 jupyter: python3
 ---
 
-
 ## Was erwartet Euch in den kommenden 60 Minuten?
 
-- Quiz
-- Begriffsklärungen
-- Warum Verifikationen und Validierungen?
-- Welche Arten von Verifikationen und Validierungen gibt es?
-- Regulatorische Grundlagen
-- Verifikationen und Validierungen in der Klinischen Chemie
-- Verifikationen und Validierungen in der Mikrobiologie
-- Verifikationen und Validierungen in der Hämatologie
-- Verifiaktionen und Validierungen in der IT
-- Quiz
-
+-   Quiz
+-   Begriffsklärungen
+-   Warum Verifikationen und Validierungen?
+-   Welche Arten von Verifikationen und Validierungen gibt es?
+-   Regulatorische Grundlagen
+-   Verifikationen und Validierungen in der Klinischen Chemie
+-   Verifikationen und Validierungen in der Mikrobiologie
+-   Verifikationen und Validierungen in der Hämatologie
+-   Verifiaktionen und Validierungen in der IT
+-   Quiz
 
 ## Was ist Verifikation und Validierung?
 
-- Verifikation: 
-  - Ist das richtige Produkt entwickelt worden?
-  - Wurde das Produkt richtig entwickelt?
-  
-- Validierung:
-  - Ist das richtige Produkt entwickelt worden?
-  - Wurde das Produkt richtig entwickelt?
-  - Ist das Produkt für den vorgesehenen Zweck geeignet?
-  
-  
+-   Verifikation:
+    -   Ist das richtige Produkt entwickelt worden?
+    -   Wurde das Produkt richtig entwickelt?
+-   Validierung:
+    -   Ist das richtige Produkt entwickelt worden?
+    -   Wurde das Produkt richtig entwickelt?
+    -   Ist das Produkt für den vorgesehenen Zweck geeignet?
+
 ## Warum Verifikationen und Validierungen?
 
-- Verifikationen und Validierungen sind gesetzlich vorgeschrieben
-- Verifikationen und Validierungen sind notwendig, 
-    - um die Qualität der Ergebnisse zu gewährleisten
-    - um die Patientensicherheit zu gewährleisten
-    - um die Qualität der Produkte zu gewährleisten
-    - um die Qualität der Prozesse zu gewährleisten
+-   Verifikationen und Validierungen sind gesetzlich vorgeschrieben
+-   Verifikationen und Validierungen sind notwendig,
+    -   um die Qualität der Ergebnisse zu gewährleisten
+    -   um die Patientensicherheit zu gewährleisten
+    -   um die Qualität der Produkte zu gewährleisten
+    -   um die Qualität der Prozesse zu gewährleisten
 
-## 
+## Validations-Planung
+- Beispiel St Gallen
+- Kriterien
+- Intra und Inter - Assay
+- Anzahl Proben
+
+
+
 ## Verifikationen und Validierungen im medizinischen Labor
+
 ### Begriffsdefinitionen
 
-- Warum Verifikationen und Validierungen?
-- Was ist eine Verifikation?
-- Was ist eine Validierung?
-- Was ist eine Verifizierung?
-- Was ist eine Qualifizierung?
-- Was ist eine Kalibrierung?
-- Was ist eine Messunsicherheit?
-- Was ist eine Messabweichung?
-- Was ist eine Messgenauigkeit?
-- Was ist eine Messpräzision?
-- Was ist eine Messrichtigkeit?
-- Was ist eine Messwiederholbarkeit?
-- Was ist eine Messwert?
-- Was ist eine Messwertverteilung?
-- Was ist eine Messwertverteilungsfunktion?
+-   Was ist eine Validierung?
+-   Was ist eine Verifizierung?
+-   Was ist eine Qualifizierung?
+-   Was ist eine Kalibrierung?
+-   Was ist eine Messunsicherheit?
+-   Was ist eine Messabweichung?
+-   Was ist eine Messgenauigkeit?
+-   Was ist eine Messpräzision?
+-   Was ist eine Messrichtigkeit?
+-   Was ist eine Messwiederholbarkeit?
+-   Was ist eine Messwert?
+-   Was ist eine Messwertverteilung?
+-   Was ist eine Messwertverteilungsfunktion?
 
-##  Statistische Grundlagen
+## Statistische Grundlagen
 
-- Passings-Bablok-Regression
-- Bland-Altman-Plot
-
+-   Passings-Bablok-Regression
+-   Bland-Altman-Plot
 
 ## Praktische Beispiele
 
-- Verifikationen und Validierungen in der Klinischen Chemie
-  Siemens vs Beckman Coulter
-  
-## Praktische Beispiele
-  
-   Siemens vs Optilite
-   
+-   Verifikationen und Validierungen in der Klinischen Chemie Siemens vs Beckman Coulter
 
+## Praktische Beispiele
+
+Siemens vs Optilite
